@@ -57,3 +57,11 @@ The package has no run-time dependencies. `make audit` runs pip-audit
 over every locked development dependency in `uv.lock`; CI runs it on
 every push. Dependabot proposes weekly updates of `uv.lock` and of the
 pinned workflow actions.
+
+### Release integrity
+
+Nothing has been released yet. `release.yml` will publish each version
+from a signed annotated tag (`git verify-tag v<version>` against
+`KEYS.asc`), after the `make check` gate and `make audit`, through PyPI
+trusted publishing with no stored token. The GitHub release carries the
+sdist, the wheel and `SHA256SUMS`.

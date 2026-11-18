@@ -14,6 +14,7 @@ Nothing here is dated.
    source commit, a checksum test and a CI job that replays every tape.
 4. **Port the generators**, entropy calculation and validation, each
    passing the kit.
-5. **Release.** A release workflow with a dry-run mode, PyPI trusted
-   publishing, `SHA256SUMS` and an SBOM; then examples, benchmarks and the
-   README demo, all against real output.
+5. **Release.** The release workflow (`release.yml`: tag checks, PyPI
+   trusted publishing, `SHA256SUMS`, a draft GitHub release) lands in
+   0.0.22. Still to come: a dry-run mode and an SBOM; then examples,
+   benchmarks and the README demo, all against real output.

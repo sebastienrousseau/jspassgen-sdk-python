@@ -34,10 +34,11 @@ committed and every `make` target runs with `--frozen`.
 | `docs-lint.yml` | markdownlint, the README template, codespell, REUSE, links | `scripts/readme-check.sh` and the tools named in the workflow |
 | `dco.yml` | `Signed-off-by:` on every commit | `git log --format=%B` |
 | `scorecard.yml` | OpenSSF Scorecard | (GitHub only) |
+| `release.yml` (on a `v*` tag) | The tag, `make check`, `make audit`, the build and `SHA256SUMS`; then PyPI and a draft GitHub release | `make check audit build` |
 
-There is no release, fuzz or conformance workflow yet. Release is added
-with the first publishable version; fuzzing has no input parser to
-target; the conformance job arrives with jspassgen's kit.
+There is no fuzz or conformance workflow yet. Fuzzing has no input
+parser to target; the conformance job arrives with the first ported
+generator, which replays jspassgen's kit.
 
 ## Coverage
 
@@ -66,17 +67,34 @@ source.
 
 ## Release model
 
-Planned; nothing has been released. For each version:
+`.github/workflows/release.yml` releases a pushed `v<version>` tag.
+Nothing has been released yet; the first release is the suite's first
+lockstep version, 0.0.22.
 
 1. On `feat/v<version>`: move the version in `pyproject.toml` and every
-   restatement (`scripts/verify-release-versions`), date the
-   `CHANGELOG.md` heading, and write `docs/releases/<version>.md` with a
-   `## Highlights` section.
-2. Merge the release pull request into `main` once CI is green.
-3. Tag `main` with a signed annotated tag:
-   `git tag -s v<version> -m "jspassgen-sdk-python v<version>"`, and push
-   the tag.
+   restatement (`scripts/verify-release-versions`), and date the
+   `CHANGELOG.md` heading. Merge the release pull request into `main`
+   once CI is green.
+2. Tag `main` with a signed annotated tag, check it with
+   `git verify-tag v<version>` (`KEYS.asc`), and push it:
+   `git tag -s v<version> -m "jspassgen-sdk-python v<version>"`.
+3. The `check` job refuses a tag that is not annotated, not signed, not
+   on the checked-out commit, or whose message or version does not match
+   `pyproject.toml`. It runs `make check` and `make audit`, builds the
+   sdist and wheel with `make build` (`twine check --strict`), and writes
+   `SHA256SUMS`. CI cannot verify the signature itself; step 2 does.
+4. The `publish-pypi` job waits for a maintainer to approve the `pypi`
+   environment, checks the files against `SHA256SUMS`, and uploads them
+   to PyPI through trusted publishing
+   (`pypa/gh-action-pypi-publish`, which also uploads PEP 740
+   attestations); no PyPI token is stored. A version already on PyPI is
+   skipped, so a rerun is safe.
+5. The `github-release` job drafts the GitHub release
+   `jspassgen-sdk-python <version>` with the sdist, the wheel and
+   `SHA256SUMS`. The maintainer writes the Highlights and publishes the
+   draft.
 
-The release workflow (build, `SHA256SUMS`, SBOM, provenance, GitHub
-release, PyPI trusted publishing) is not written yet; it lands before
-the first release, with a dry-run mode.
+Trusted publishing is configured on PyPI for the `jspassgen` project:
+the trusted publisher names this repository, `release.yml` and the
+`pypi` environment. Until the project exists on PyPI, that is a pending
+publisher. There is no dry-run mode, SBOM or SLSA provenance yet.

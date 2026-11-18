@@ -71,8 +71,9 @@ ships.
 
 Nothing is published yet. The suite plan names `jspassgen` as this
 package's PyPI name, but no release has been uploaded, so
-`pip install jspassgen` does not install this code. Until the first
-release, install from a commit:
+`pip install jspassgen` does not install this code. From the first
+release, `release.yml` publishes each signed tag to PyPI through trusted
+publishing. Until then, install from a commit:
 
 ```bash
 pip install "git+https://github.com/sebastienrousseau/jspassgen-sdk-python@<commit>"
