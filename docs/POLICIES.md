@@ -15,7 +15,8 @@
 ## Versioning
 
 Lockstep with the jspassgen suite, in `0.0.1` steps. Package 0.0.N will
-pass the conformance kit of jspassgen 0.0.N once the kit exists.
+pass the conformance kit of jspassgen 0.0.N once it vendors the kit,
+which jspassgen has shipped since 0.0.21.
 
 ## Deprecation
 

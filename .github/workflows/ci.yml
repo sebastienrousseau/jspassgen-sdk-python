@@ -4,7 +4,8 @@
 # shellcheck, pip-audit, the manual), the unit tests on Python 3.11 to
 # 3.14 at 100% line and branch coverage, the sdist and wheel, and the API
 # compatibility check against the last tag. There is no conformance job
-# yet: jspassgen's conformance kit does not exist.
+# yet: jspassgen's conformance kit (shipped in jspassgen 0.0.21) is not
+# vendored here, and no generator is ported to replay it.
 name: CI
 
 on:

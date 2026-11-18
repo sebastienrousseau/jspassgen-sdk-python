@@ -2,8 +2,8 @@
 """jspassgen for Python: a native port of the jspassgen core, in progress.
 
 This version provides the random port and its CSPRNG adapter only. The
-password and passphrase generators follow once jspassgen publishes its
-conformance kit.
+password and passphrase generators follow, each checked against
+jspassgen's conformance kit (shipped in jspassgen 0.0.21).
 """
 
 from __future__ import annotations
