@@ -5,13 +5,13 @@
 ## Supported versions
 
 This package follows the [jspassgen](https://github.com/sebastienrousseau/jspassgen)
-suite cadence. Nothing has been released yet; `0.0.22` is the planned
-first version. While pre-`1.0`, the latest released `0.0.x` will receive
-security fixes; older `0.0.x` versions will not.
+suite cadence. `0.0.22`, the first version, is the latest release. While
+pre-`1.0`, the latest released `0.0.x` receives security fixes; older
+`0.0.x` versions do not.
 
 | Version | Status | Receives security fixes? |
 | :--- | :--- | :--- |
-| `0.0.22` (next) | Unreleased | Not yet released |
+| `0.0.22` (latest) | Released 2026-11-18 | Yes |
 | `main` | In development | Yes |
 
 ## Reporting a vulnerability
@@ -57,3 +57,10 @@ The package has no run-time dependencies. `make audit` runs pip-audit
 over every locked development dependency in `uv.lock`; CI runs it on
 every push. Dependabot proposes weekly updates of `uv.lock` and of the
 pinned workflow actions.
+
+### Release integrity
+
+`release.yml` publishes each version from a signed annotated tag
+(`git verify-tag v<version>` against `KEYS.asc`), after the `make check`
+gate and `make audit`, through PyPI trusted publishing with no stored
+token. The GitHub release carries the sdist, the wheel and `SHA256SUMS`.

@@ -4,7 +4,7 @@
 
 `jspassgen-sdk-python` is the native Python port of jspassgen's core
 (`packages/core` in [jspassgen](https://github.com/sebastienrousseau/jspassgen)),
-a planned member of the jspassgen suite
+a member of the jspassgen suite
 ([ADR 0001](https://github.com/sebastienrousseau/jspassgen/blob/main/docs/adr/0001-ecosystem-lockstep.md)).
 Its value is that a Python caller gets the same passwords, entropy and
 errors as the JavaScript core, generated on their own machine from the

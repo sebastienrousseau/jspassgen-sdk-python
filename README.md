@@ -12,7 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/sebastienrousseau/jspassgen-sdk-python/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/sebastienrousseau/jspassgen-sdk-python/ci.yml?style=for-the-badge&logo=github" alt="Build" height="28" /></a>
-  <a href="#install"><img src="https://img.shields.io/badge/PyPI-not%20published%20yet-lightgrey?style=for-the-badge&color=fc8d62&logo=pypi&logoColor=white" alt="PyPI: not published yet" height="28" /></a>
+  <a href="https://pypi.org/project/jspassgen/"><img src="https://img.shields.io/pypi/v/jspassgen?style=for-the-badge&color=fc8d62&logo=pypi&logoColor=white" alt="PyPI version" height="28" /></a>
   <a href="https://github.com/sebastienrousseau/jspassgen-sdk-python/tree/main/docs"><img src="https://img.shields.io/badge/docs-manual-blue?style=for-the-badge&labelColor=555555&logo=readthedocs" alt="Docs" height="28" /></a>
   <a href="https://scorecard.dev/viewer/?uri=github.com/sebastienrousseau/jspassgen-sdk-python"><img src="https://img.shields.io/ossf-scorecard/github.com/sebastienrousseau/jspassgen-sdk-python?style=for-the-badge&label=OpenSSF%20Scorecard&logo=openssf" alt="OpenSSF Scorecard" height="28" /></a>
   <a href="LICENSE-APACHE"><img src="https://img.shields.io/badge/license-Apache--2.0%20OR%20MIT-blue.svg?style=for-the-badge" alt="License: Apache-2.0 OR MIT" height="28" /></a>
@@ -29,7 +29,7 @@
 
 **Getting started**
 
-- [Install](#install): from a commit with pip; not on PyPI yet
+- [Install](#install): from PyPI with pip
 - [Requirements](#requirements): Python floor, platforms
 - [Quick Start](#quick-start): draw unbiased integers and bytes from the CSPRNG
 
@@ -57,27 +57,20 @@
 
 ---
 
-## Development version
-
-This branch prepares unreleased v0.0.22, planned as the first jspassgen
-suite release. It is not on PyPI yet; install from a commit until it
-ships.
-
----
-
 ## Install
 
 ### As a Python library
 
-Nothing is published yet. The suite plan names `jspassgen` as this
-package's PyPI name, but no release has been uploaded, so
-`pip install jspassgen` does not install this code. Until the first
-release, install from a commit:
+`release.yml` publishes each signed tag to PyPI through trusted
+publishing. Install 0.0.22, the first release, with pip:
 
 ```bash
-pip install "git+https://github.com/sebastienrousseau/jspassgen-sdk-python@<commit>"
+pip install jspassgen==0.0.22
 python -c 'import jspassgen; print(jspassgen.__version__)'
 ```
+
+This version ships the random port and its `secrets` adapter; the
+generators come in a later version.
 
 The distribution and the import package are both `jspassgen`. The
 package has no run-time dependencies, ships type information (PEP 561,
@@ -143,10 +136,11 @@ conformance kit as its generators land.
 | [`jspassgen-sdk-cpp`](https://github.com/sebastienrousseau/jspassgen-sdk-cpp) | Native C++17 port on the OS CSPRNG | C++ programs |
 | [`jspassgen.github.io`](https://github.com/sebastienrousseau/jspassgen.github.io) | Source of [jspassgen.com](https://jspassgen.com) | Evaluating the suite |
 
-Only `@sebastienrousseau/jspassgen` is on a package registry so far
-(0.0.21 on npm). The table gives each member's purpose; the other members
-are early, each README's Capabilities at a glance says what works today,
-and they first publish with the suite's first lockstep release.
+Every member ships at 0.0.22, the suite's first lockstep release: the
+core, CLI, MCP and LSP servers on npm, the Python, Rust, Java and .NET
+SDKs on PyPI, crates.io, Maven Central and NuGet, and the C++ SDK and
+the site as GitHub releases. The table gives each member's purpose, and
+each README's Capabilities at a glance says what works today.
 
 ---
 
@@ -154,8 +148,8 @@ and they first publish with the suite's first lockstep release.
 
 | Area | Capability | Status |
 | :--- | :--- | :--- |
-| Randomness | `RandomGeneratorPort`: `random_bytes(n)`, `random_int(max)` | On this branch (0.0.22, unreleased) |
-| Randomness | `SecretsRandom`: the port on `secrets`, unbiased `random_int` | On this branch (0.0.22, unreleased) |
+| Randomness | `RandomGeneratorPort`: `random_bytes(n)`, `random_int(max)` | Released in 0.0.22 |
+| Randomness | `SecretsRandom`: the port on `secrets`, unbiased `random_int` | Released in 0.0.22 |
 | Conformance | The core's kit vendored into `conformance/`, every draw tape replayed in CI | Planned: the kit ships in jspassgen 0.0.21, not vendored here yet |
 | Generators | The core's password types: `strong`, `base64`, `custom`, `diceware`, `memorable`, `pronounceable`, `honeyword`, `quantum-resistant` | Planned, against the kit |
 | Entropy | Entropy calculation and validation with the core's error messages | Planned, against the kit |
@@ -217,7 +211,6 @@ Start above covers it. Runnable examples arrive with the generators.
 - This version generates no passwords or passphrases. Use the
   JavaScript [`jspassgen`](https://github.com/sebastienrousseau/jspassgen)
   core, or `secrets` directly (`secrets.token_urlsafe`, `secrets.choice`).
-- Nothing is on PyPI yet, so it cannot be a registry dependency.
 - Byte-for-byte agreement with the JavaScript core is the goal, but no
   vector of the core's conformance kit runs here yet.
 - `SecretsRandom` cannot be seeded, by design. A deterministic port is
@@ -280,7 +273,7 @@ yet.
 ## Stability guarantees
 
 - Versions advance in `0.0.1` steps in lockstep with the jspassgen suite;
-  0.0.22 is the planned first suite version and is not released.
+  0.0.22 is the first released suite version.
 - The breaking axis is the public API of `jspassgen`: a removed or
   renamed name, argument or exception is breaking.
 - Once generators exist, output is part of the contract: the same

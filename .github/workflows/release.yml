@@ -1,0 +1,187 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# Release on a pushed `v<version>` tag, in three jobs:
+#
+# 1. check: the tag is an annotated, signed tag whose message is
+#    `<repository> v<version>` and whose version matches pyproject.toml;
+#    then the `make check` gate and `make audit`; then `make build` (sdist
+#    and wheel, `twine check --strict`), and SHA256SUMS over both.
+# 2. publish-pypi: publishes those exact files to PyPI, after a
+#    maintainer approves the `pypi` environment (required reviewer). PyPI
+#    trusted publishing accepts this workflow in that environment, so no
+#    API token is stored. A version already on PyPI is skipped, so a rerun
+#    is safe.
+# 3. github-release: a draft GitHub release titled `<repository>
+#    <version>` with the sdist, the wheel and SHA256SUMS attached, and
+#    notes with What's Changed, the checksums and the Full Changelog
+#    line. The maintainer writes the Highlights and publishes the draft.
+#
+# CI cannot verify the tag's signature (it has no maintainer keys); it
+# checks that the tag carries one. Verify it locally with
+# `git verify-tag v<version>` (KEYS.asc) before pushing the tag.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    name: Check the tag, run the gate, build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    outputs:
+      name: ${{ steps.tag.outputs.name }}
+      version: ${{ steps.tag.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.1"
+      - name: Check the tag against pyproject.toml
+        id: tag
+        env:
+          TAG: ${{ github.ref_name }}
+          PROJECT: ${{ github.event.repository.name }}
+        run: |
+          git fetch --force origin "+refs/tags/${TAG}:refs/tags/${TAG}"
+          read_project() {
+            python3 -c 'import sys, tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"][sys.argv[1]])' "$1"
+          }
+          name=$(read_project name)
+          version=$(read_project version)
+          fail() { echo "::error::$1"; exit 1; }
+          [ "$TAG" = "v${version}" ] || fail "tag ${TAG} does not match pyproject.toml version ${version}"
+          [ "$(git cat-file -t "$TAG")" = "tag" ] || fail "${TAG} is not an annotated tag"
+          subject=$(git tag -l --format='%(contents:subject)' "$TAG")
+          [ "$subject" = "${PROJECT} v${version}" ] || fail "tag message is '${subject}', expected '${PROJECT} v${version}'"
+          [ -n "$(git tag -l --format='%(contents:signature)' "$TAG")" ] || fail "${TAG} is not signed"
+          [ "$(git rev-parse "${TAG}^{commit}")" = "$GITHUB_SHA" ] || fail "${TAG} does not point at the checked-out commit"
+          echo "name=${name}" >> "$GITHUB_OUTPUT"
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+      - name: Locked environment
+        run: make sync
+      - name: Gate (make check)
+        run: make check
+      - name: Known vulnerabilities (make audit)
+        run: make audit
+      - name: Build the sdist and wheel (make build)
+        run: make build
+      - name: Checksum
+        # The distributions go in release/dist, which the publish job
+        # hands to PyPI as is; SHA256SUMS sits beside it, not inside.
+        run: |
+          mkdir -p release
+          cp -R dist release/dist
+          (cd release/dist && sha256sum -- * > ../SHA256SUMS)
+          cat release/SHA256SUMS
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release
+          path: release/
+          if-no-files-found: error
+          retention-days: 30
+
+  publish-pypi:
+    name: Publish to PyPI
+    needs: check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment: pypi
+    permissions:
+      contents: read
+      id-token: write # PyPI trusted publishing (OIDC) and attestations
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: release
+      - name: Check the distributions against SHA256SUMS
+        working-directory: release/dist
+        run: sha256sum --check ../SHA256SUMS
+      - name: Skip a version already on PyPI
+        id: registry
+        env:
+          NAME: ${{ needs.check.outputs.name }}
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          if curl -fsS -o /dev/null "https://pypi.org/pypi/${NAME}/${VERSION}/json"; then
+            echo "::notice::${NAME} ${VERSION} is already on PyPI; nothing to publish"
+            echo "published=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "published=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Publish with trusted publishing
+        if: steps.registry.outputs.published == 'false'
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+        with:
+          packages-dir: release/dist/
+      - name: Verify the version is public on PyPI
+        if: steps.registry.outputs.published == 'false'
+        env:
+          NAME: ${{ needs.check.outputs.name }}
+          VERSION: ${{ needs.check.outputs.version }}
+        # PyPI's JSON API is cached and can lag the upload, so poll
+        # before failing.
+        run: |
+          for attempt in $(seq 1 20); do
+            if curl -fsS "https://pypi.org/pypi/${NAME}/${VERSION}/json" \
+              | python3 -c 'import json, sys; [print(f["filename"], f["digests"]["sha256"]) for f in json.load(sys.stdin)["urls"]]'; then
+              exit 0
+            fi
+            echo "Attempt ${attempt}: ${NAME} ${VERSION} not visible yet; retrying in 30s."
+            sleep 30
+          done
+          echo "${NAME} ${VERSION} is still not visible on PyPI after 10 minutes." >&2
+          exit 1
+
+  github-release:
+    name: Draft the GitHub release
+    needs: [check, publish-pypi]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write # create the draft release and upload its assets
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: release
+      - name: Create the draft release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+          PROJECT: ${{ github.event.repository.name }}
+          VERSION: ${{ needs.check.outputs.version }}
+        # The generated notes end with the Full Changelog line; the
+        # checksums go just before it, as the release standard orders them.
+        run: |
+          gh api "repos/${REPO}/releases/generate-notes" -f tag_name="$TAG" --jq .body > generated.md
+          {
+            echo "## Highlights ⭐️"
+            echo
+            grep -v '^\*\*Full Changelog\*\*' generated.md
+            echo
+            echo "## Checksums"
+            echo
+            echo "SHA-256 of every asset attached to this release:"
+            echo
+            echo '```text'
+            cat release/SHA256SUMS
+            echo '```'
+            echo
+            grep '^\*\*Full Changelog\*\*' generated.md || true
+          } > notes.md
+          gh release create "$TAG" release/dist/* release/SHA256SUMS --repo "$REPO" --draft \
+            --title "${PROJECT} ${VERSION}" --notes-file notes.md --verify-tag

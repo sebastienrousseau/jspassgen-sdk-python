@@ -49,8 +49,8 @@ Only the maintainer pushes tags.
 
 - **Code and history** are public on GitHub; anyone can fork and build
   from them. Every commit and tag is signed.
-- **No secret is needed to build or test.** PyPI publishing will use
-  trusted publishing (OIDC), with no stored token.
+- **No secret is needed to build or test.** `release.yml` publishes to
+  PyPI through trusted publishing (OIDC), with no stored token.
 - **If the maintainer is unreachable** for 90 days, the project should
   be treated as unmaintained: users should pin a release, and a fork may
   continue it under a new name. Adding a second maintainer is a standing
