@@ -1,0 +1,70 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# Prose, licence and link gates on every push and pull request:
+# markdownlint (.markdownlint-cli2.jsonc), codespell (.codespellrc), REUSE
+# (SPDX licence and copyright on every file, REUSE.toml), the README
+# template check (scripts/readme-check.sh) and lychee on every Markdown
+# file's intra-repository links. Locally:
+# `npx markdownlint-cli2@0.23.3 "**/*.md"`, `codespell`, `reuse lint`,
+# `scripts/readme-check.sh`, `lychee --offline '**/*.md'`.
+name: Docs lint
+
+on:
+  push:
+    branches: [main, "feat/*"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docs-lint-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  docs-lint:
+    name: markdownlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+
+      - name: Markdown style
+        run: npx --yes markdownlint-cli2@0.23.3 "**/*.md"
+
+      - name: The README follows the template
+        run: scripts/readme-check.sh
+
+  spelling-licences-links:
+    name: codespell, REUSE and links
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: codespell
+        uses: codespell-project/actions-codespell@e3258cca84ce02b0bb36a3d41f2c18f719a0cc1a # v2.4.3
+
+      - name: REUSE (SPDX on every file)
+        uses: fsfe/reuse-action@676e2d560c9a403aa252096d99fcab3e1132b0f5 # v6.0.0
+
+      - name: Intra-repository links (lychee, offline)
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+        with:
+          args: >-
+            --offline
+            --include-fragments
+            --no-progress
+            --exclude-path .venv
+            --exclude-path site
+            './**/*.md'
+          fail: true

@@ -1,0 +1,28 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# Machine-readable licensing, per the REUSE specification (`reuse lint`
+# runs in the docs-lint workflow). Source files carry an SPDX header; this
+# file adds the copyright line to every file and covers the files whose
+# format has no room for a header.
+
+version = 1
+SPDX-PackageName = "jspassgen-sdk-python"
+SPDX-PackageSupplier = "Sebastien Rousseau"
+SPDX-PackageDownloadLocation = "https://github.com/sebastienrousseau/jspassgen-sdk-python"
+
+# Everything in this repository: the copyright holder, and the licence for
+# files that cannot carry a header (the lock file, py.typed, the empty
+# complexity baseline).
+[[annotations]]
+path = ["**"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 Sebastien Rousseau"
+SPDX-License-Identifier = "Apache-2.0 OR MIT"
+
+# The Developer Certificate of Origin, reproduced verbatim as its own
+# notice allows.
+[[annotations]]
+path = ["DCO.txt"]
+precedence = "override"
+SPDX-FileCopyrightText = "2004, 2006 The Linux Foundation and its contributors"
+SPDX-License-Identifier = "LicenseRef-DCO-verbatim"

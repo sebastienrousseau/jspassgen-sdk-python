@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# codespell (docs-lint workflow). Skipped: environments, build output,
+# licence texts and the lock file.
+[codespell]
+skip = ./.git,./.venv,./dist,./site,./LICENSES,./uv.lock,./.mypy_cache,./.ruff_cache,./.hypothesis
+check-hidden = true

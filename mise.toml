@@ -1,0 +1,9 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# Pinned toolchain: `mise install` provides these; CI installs the same
+# uv. The Python floor is 3.11 (pyproject.toml); 3.14 is the development
+# interpreter, and CI tests 3.11 to 3.14. Node runs markdownlint (npx).
+[tools]
+python = "3.14"
+uv = "0.13.1"
+node = "24"
