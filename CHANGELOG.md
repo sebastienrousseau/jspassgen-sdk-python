@@ -6,10 +6,10 @@ All notable changes to this project are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions
 advance in `0.0.1` steps in lockstep with the jspassgen suite.
 
-## [0.0.22] - Unreleased
+## [0.0.22] - 2026-11-18
 
-The repository's first version, planned as the first jspassgen suite
-release. Nothing is published yet.
+The repository's first version, released as the first jspassgen suite
+release.
 
 ### Added
 

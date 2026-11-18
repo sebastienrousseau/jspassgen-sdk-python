@@ -4,9 +4,9 @@
 
 A native Python port of the
 [jspassgen](https://github.com/sebastienrousseau/jspassgen) password and
-passphrase core, in development. This version provides the random port
-the generators will be built on, and its adapter on the `secrets`
-module. Nothing is published to PyPI yet.
+passphrase core. This version provides the random port the generators
+will be built on, and its adapter on the `secrets` module. It is on PyPI
+as `jspassgen` (`pip install jspassgen==0.0.22`).
 
 ```python
 from jspassgen import SecretsRandom

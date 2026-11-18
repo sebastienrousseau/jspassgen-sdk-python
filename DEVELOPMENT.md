@@ -68,8 +68,7 @@ source.
 ## Release model
 
 `.github/workflows/release.yml` releases a pushed `v<version>` tag.
-Nothing has been released yet; the first release is the suite's first
-lockstep version, 0.0.22.
+The first release is the suite's first lockstep version, 0.0.22.
 
 1. On `feat/v<version>`: move the version in `pyproject.toml` and every
    restatement (`scripts/verify-release-versions`), and date the
