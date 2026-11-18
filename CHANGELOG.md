@@ -24,3 +24,10 @@ release. Nothing is published yet.
 - The repository standard: `make check` gate, CI on Python 3.11 to 3.14,
   CodeQL, DCO, docs lint (markdownlint, codespell, REUSE, links), OpenSSF
   Scorecard, Dependabot, community files and the manual in `docs/`.
+- The release workflow (`.github/workflows/release.yml`), run on a
+  pushed `v*` tag: it refuses a tag that is not annotated and signed,
+  not on the checked-out commit, or whose message or version does not
+  match `pyproject.toml`; runs `make check` and `make audit`; builds the
+  sdist and wheel with `SHA256SUMS`; publishes to PyPI through trusted
+  publishing behind the `pypi` environment; and drafts the GitHub
+  release with the files and checksums.
