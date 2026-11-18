@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+cff-version: 1.2.0
+message: "If you use jspassgen for Python in research or production write-ups, please cite it as below."
+type: software
+title: "jspassgen for Python: a native port of the jspassgen password generator core"
+abstract: >-
+  A native Python port of the jspassgen password and passphrase core,
+  drawing randomness only from the operating system's CSPRNG through the
+  secrets module, with no network access. In development: the current
+  version provides the random port and its unbiased CSPRNG adapter.
+authors:
+  - family-names: Rousseau
+    given-names: Sebastien
+version: "0.0.22"
+# Dual-licensed, at the user's option (LICENSE-APACHE, LICENSE-MIT).
+license:
+  - Apache-2.0
+  - MIT
+repository-code: "https://github.com/sebastienrousseau/jspassgen-sdk-python"
+url: "https://jspassgen.com"
+keywords:
+  - password
+  - passphrase
+  - generator
+  - csprng
+  - Python
+  - SDK

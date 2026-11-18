@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://github.com/sebastienrousseau/jspassgen-sdk-python/blob/main/README.md
+    about: Read the README before opening an issue.
+  - name: Contributing Guide
+    url: https://github.com/sebastienrousseau/jspassgen-sdk-python/blob/main/CONTRIBUTING.md
+    about: Follow contribution and review expectations.
+  - name: Core behaviour
+    url: https://github.com/sebastienrousseau/jspassgen/issues
+    about: A generator rule, entropy figure or error code shared with the JavaScript core belongs to jspassgen.

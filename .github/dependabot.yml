@@ -1,0 +1,38 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# Weekly updates of the locked Python dependencies (uv.lock) and the
+# pinned workflow actions. Dependabot opens its PRs against main; each
+# is folded into the active feat/v<next-version> branch as commits and
+# closed, never merged into main (AGENTS.md).
+version: 2
+updates:
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "automated"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    groups:
+      python:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "ci/cd"
+      - "automated"
+    commit-message:
+      prefix: "ci"
+    groups:
+      github-actions:
+        patterns:
+          - "*"

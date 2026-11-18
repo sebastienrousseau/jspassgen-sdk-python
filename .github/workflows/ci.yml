@@ -1,0 +1,128 @@
+# SPDX-License-Identifier: Apache-2.0 OR MIT
+#
+# Lint (version files, ruff, mypy --strict, the complexity ceilings,
+# shellcheck, pip-audit, the manual), the unit tests on Python 3.11 to
+# 3.14 at 100% line and branch coverage, the sdist and wheel, and the API
+# compatibility check against the last tag. There is no conformance job
+# yet: jspassgen's conformance kit does not exist.
+name: CI
+
+on:
+  push:
+    branches: [main, "feat/*"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Versions, lint, types, complexity, audit
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.1"
+      - name: Locked environment
+        run: make sync
+      - name: Version files agree
+        run: make versions
+      - name: Shell scripts (shellcheck)
+        run: shellcheck scripts/*.sh scripts/verify-release-versions
+      - name: ruff lint and format
+        run: make lint format-check
+      - name: mypy --strict
+        run: make typecheck
+      - name: Complexity ceilings (cyclomatic, cognitive, Halstead, lines)
+        run: make complexity
+      - name: Known vulnerabilities in locked dependencies (pip-audit)
+        run: make audit
+      - name: The manual builds (mkdocs --strict)
+        run: make docs
+
+  test:
+    name: Unit tests and coverage (Python ${{ matrix.python }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13", "3.14"]
+    env:
+      UV_PYTHON: ${{ matrix.python }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.1"
+          python-version: ${{ matrix.python }}
+      - name: Unit tests, gate at 100% line and branch
+        run: make sync coverage
+      - name: Upload the coverage report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage-${{ matrix.python }}
+          path: coverage.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+  build:
+    name: sdist and wheel
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.1"
+      - name: Build and check the metadata
+        run: make sync build
+      - name: The wheel installs and imports in a clean environment
+        run: |
+          python3 -m venv "$RUNNER_TEMP/wheel"
+          "$RUNNER_TEMP/wheel/bin/pip" install dist/*.whl
+          cd "$RUNNER_TEMP"
+          "$RUNNER_TEMP/wheel/bin/python" -c 'import jspassgen; print(jspassgen.__version__); print(jspassgen.SecretsRandom().random_int(6) + 1)'
+
+  api:
+    name: API compatibility with the last tag (griffe)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.1"
+      - name: Find the last release tag
+        id: baseline
+        run: |
+          tag=$(git describe --tags --abbrev=0 --match 'v*' HEAD 2>/dev/null || true)
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          [ -n "$tag" ] || echo "No v* tag yet: the gate starts with the first release."
+      - name: Public API against the last tag (the gate)
+        if: steps.baseline.outputs.tag != ''
+        env:
+          TAG: ${{ steps.baseline.outputs.tag }}
+        run: uvx --from griffe==2.4.1 griffe check jspassgen --search src --against "$TAG"
+      - name: Public API against main (informational, no tag yet)
+        if: steps.baseline.outputs.tag == ''
+        run: |
+          uvx --from griffe==2.4.1 griffe check jspassgen --search src \
+            --against "$(git merge-base HEAD origin/main)" || echo "informational only"
