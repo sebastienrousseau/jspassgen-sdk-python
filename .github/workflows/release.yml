@@ -132,11 +132,12 @@ jobs:
           NAME: ${{ needs.check.outputs.name }}
           VERSION: ${{ needs.check.outputs.version }}
         # PyPI's JSON API is cached and can lag the upload, so poll
-        # before failing.
+        # before failing. The response is saved and read by jq, never
+        # piped into an interpreter (Scorecard's downloadThenRun).
         run: |
           for attempt in $(seq 1 20); do
-            if curl -fsS "https://pypi.org/pypi/${NAME}/${VERSION}/json" \
-              | python3 -c 'import json, sys; [print(f["filename"], f["digests"]["sha256"]) for f in json.load(sys.stdin)["urls"]]'; then
+            if curl -fsS -o "$RUNNER_TEMP/pypi.json" "https://pypi.org/pypi/${NAME}/${VERSION}/json" \
+              && jq -er '.urls[] | "\(.filename) \(.digests.sha256)"' "$RUNNER_TEMP/pypi.json"; then
               exit 0
             fi
             echo "Attempt ${attempt}: ${NAME} ${VERSION} not visible yet; retrying in 30s."
