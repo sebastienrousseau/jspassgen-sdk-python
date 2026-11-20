@@ -44,7 +44,7 @@ from radon.metrics import h_visit
 
 ROOT = Path(__file__).resolve().parent.parent
 BASELINE = ROOT / "scripts" / "complexity-baseline.json"
-PATHS = ("src", "tests", "scripts")
+PATHS = ("src", "tests", "scripts", "fuzz")
 #: Nothing in the tree is exempt.
 EXCLUDE: tuple[str, ...] = ()
 

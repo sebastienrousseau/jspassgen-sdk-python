@@ -9,7 +9,7 @@ UV  ?= uv
 RUN  = $(UV) run --frozen
 
 .PHONY: check sync versions lint format format-check typecheck complexity test coverage \
-  audit build docs clean
+  fuzz audit build docs clean
 
 check: sync versions lint format-check typecheck complexity coverage
 
@@ -48,6 +48,18 @@ coverage:
 	$(RUN) coverage report
 	$(RUN) coverage xml -q
 
+# Atheris (libFuzzer) on tests/fuzz_contract.py for FUZZ_SECONDS, from a
+# scratch copy of fuzz/corpus. Atheris installs only on Linux x86-64 with
+# CPython 3.12 to 3.14 (pyproject.toml); the unit tests replay the same
+# contract everywhere. A crash is written to .fuzz-corpus/.
+FUZZ_SECONDS ?= 60
+
+fuzz:
+	rm -rf .fuzz-corpus
+	mkdir -p .fuzz-corpus/new
+	$(RUN) python -m fuzz.fuzz_random -max_total_time=$(FUZZ_SECONDS) \
+	  -artifact_prefix=.fuzz-corpus/ .fuzz-corpus/new fuzz/corpus
+
 # pip-audit over every locked dependency, development tools included.
 audit:
 	$(UV) export --frozen --all-groups --no-emit-project --format requirements-txt \
@@ -64,4 +76,4 @@ docs:
 	$(UV) run --frozen --group docs mkdocs build --strict
 
 clean:
-	rm -rf dist build site htmlcov .coverage coverage.xml .hypothesis
+	rm -rf dist build site htmlcov .coverage coverage.xml .hypothesis .fuzz-corpus
