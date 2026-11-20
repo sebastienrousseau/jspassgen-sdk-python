@@ -2,7 +2,8 @@
 #
 # Lint (version files, ruff, mypy --strict, the complexity ceilings,
 # shellcheck, pip-audit, the manual), the unit tests on Python 3.11 to
-# 3.14 at 100% line and branch coverage, the sdist and wheel, and the API
+# 3.14 at 100% line and branch coverage, a 60-second Atheris fuzz run
+# (`make fuzz`), the sdist and wheel, and the API
 # compatibility check against the last tag. There is no conformance job
 # yet: jspassgen's conformance kit (shipped in jspassgen 0.0.21) is not
 # vendored here, and no generator is ported to replay it.
@@ -76,6 +77,31 @@ jobs:
         with:
           name: coverage-${{ matrix.python }}
           path: coverage.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+  fuzz:
+    name: Fuzz the random port (Atheris, 60 s)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      UV_PYTHON: "3.14"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: "0.13.1"
+          python-version: "3.14"
+      - name: Atheris over the seed corpus, then 60 s of new input
+        run: make sync fuzz
+      - name: Upload a crash
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: fuzz-crash
+          path: .fuzz-corpus/crash-*
           if-no-files-found: ignore
           retention-days: 14
 

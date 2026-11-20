@@ -9,7 +9,7 @@ name = "jspassgen"
 # The single source of truth for the version: the package reads it back
 # with importlib.metadata, and scripts/verify-release-versions checks
 # every restatement against this line.
-version = "0.0.22"
+version = "0.0.23"
 description = "Native Python port of the jspassgen password and passphrase core, on the secrets module (in development)."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -52,6 +52,13 @@ dev = [
   "build>=1.3",
   "twine>=6.2",
 ]
+# Atheris, the coverage-guided fuzzer behind `make fuzz`. It ships
+# wheels only for Linux x86-64 on CPython 3.12 to 3.14, and building it
+# needs clang's libFuzzer, so it installs nowhere else; the unit tests
+# replay the same contract (tests/test_fuzz.py) on every platform.
+fuzz = [
+  "atheris>=3.1.0; sys_platform == 'linux' and platform_machine == 'x86_64' and python_version >= '3.12' and python_version < '3.15'",
+]
 docs = [
   "mkdocs>=1.6.1",
   "mkdocs-material>=9.7",
@@ -66,6 +73,7 @@ packages = ["src/jspassgen"]
 include = [
   "src/jspassgen",
   "tests",
+  "fuzz",
   "README.md",
   "CHANGELOG.md",
   "LICENSE-APACHE",
@@ -93,11 +101,11 @@ docstring-code-format = true
 [tool.mypy]
 strict = true
 python_version = "3.11"
-files = ["src", "tests", "scripts"]
+files = ["src", "tests", "scripts", "fuzz"]
 warn_unreachable = true
 
 [[tool.mypy.overrides]]
-module = ["radon.*", "complexipy"]
+module = ["radon.*", "complexipy", "atheris"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]

@@ -57,6 +57,7 @@ nav:
   - Policies: POLICIES.md
   - Roadmap: ROADMAP.md
   - Releases:
+      - 0.0.23: releases/0.0.23.md
       - 0.0.22: releases/0.0.22.md
   - Project:
       - README: https://github.com/sebastienrousseau/jspassgen-sdk-python/blob/main/README.md
