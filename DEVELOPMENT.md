@@ -28,6 +28,7 @@ committed and every `make` target runs with `--frozen`.
 | :--- | :--- | :--- |
 | `ci.yml` lint | Version restatements, shellcheck, ruff, mypy --strict, complexity, pip-audit, the manual | `make versions lint format-check typecheck complexity audit docs` |
 | `ci.yml` test (3.11 to 3.14) | Unit tests at 100% line and branch coverage | `make coverage` |
+| `ci.yml` fuzz | Atheris (libFuzzer) on the API contract in `tests/fuzz_contract.py`, from `fuzz/corpus`, for 60 s on Python 3.14 | `make fuzz` (Linux x86-64, CPython 3.12 to 3.14) |
 | `ci.yml` build | sdist and wheel, `twine check --strict`, a clean install | `make build` |
 | `ci.yml` api | Public API against the last tag (griffe); informational until the first tag | `uvx --from griffe==2.4.1 griffe check jspassgen --search src --against <tag>` |
 | `codeql.yml` | CodeQL for Python and for the workflows | (GitHub only) |
@@ -36,9 +37,14 @@ committed and every `make` target runs with `--frozen`.
 | `scorecard.yml` | OpenSSF Scorecard | (GitHub only) |
 | `release.yml` (on a `v*` tag) | The tag, `make check`, `make audit`, the build and `SHA256SUMS`; then PyPI and a draft GitHub release | `make check audit build` |
 
-There is no fuzz or conformance workflow yet. Fuzzing has no input
-parser to target; the conformance job arrives with the first ported
-generator, which replays jspassgen's kit.
+The fuzz job checks what `SecretsRandom` promises (range, length,
+errors and their messages, the rejection loop) on coverage-guided input.
+Atheris installs only where it ships wheels, Linux x86-64 on CPython
+3.12 to 3.14, so elsewhere `make fuzz` cannot run; `make coverage`
+still replays the seed corpus and Hypothesis input through the same
+contract (`tests/test_fuzz.py`) on every platform. There is no
+conformance workflow yet: it arrives with the first ported generator,
+which replays jspassgen's kit.
 
 ## Coverage
 

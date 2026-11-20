@@ -225,6 +225,7 @@ mise install   # Python 3.14, uv 0.13.1, Node 24 (mise.toml)
 make check     # versions, ruff, mypy --strict, complexity, 100% coverage
 make audit     # pip-audit over every locked dependency
 make build     # build and check the sdist and wheel
+make fuzz      # Atheris on the API contract, 60 s (Linux x86-64 only)
 make docs      # build the manual (mkdocs --strict)
 ```
 
@@ -232,8 +233,9 @@ make docs      # build the manual (mkdocs --strict)
 and format), `mypy --strict`, the complexity ceilings (cyclomatic 10,
 cognitive 15, Halstead difficulty 30, 60 lines per function, 500 per
 file) and the unit tests at 100% line and branch coverage. CI also runs
-shellcheck, the API compatibility check (griffe) and the docs lint
-(markdownlint, codespell, REUSE, links and the README check).
+shellcheck, a 60-second Atheris fuzz run, the API compatibility check
+(griffe) and the docs lint (markdownlint, codespell, REUSE, links and
+the README check).
 [`DEVELOPMENT.md`](DEVELOPMENT.md) maps every CI gate to its command.
 
 ---
