@@ -11,6 +11,7 @@ pre-`1.0`, the latest released `0.0.x` receives security fixes; older
 
 | Version | Status | Receives security fixes? |
 | :--- | :--- | :--- |
+| `0.0.23` (next) | Unreleased, in development | Yes |
 | `0.0.22` (latest) | Released 2026-11-18 | Yes |
 | `main` | In development | Yes |
 

@@ -18,6 +18,7 @@ jspassgen suite's version.
 
 | Version | Status | Supported |
 | :--- | :--- | :--- |
+| `0.0.23` (next) | Unreleased, in development | Yes |
 | `0.0.22` (latest) | Released 2026-11-18 | Yes |
 | `main` | In development | Yes |
 

@@ -6,6 +6,29 @@ All notable changes to this project are recorded here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions
 advance in `0.0.1` steps in lockstep with the jspassgen suite.
 
+## [0.0.23] - Unreleased
+
+The suite's second lockstep version. The library is unchanged: same
+`RandomGeneratorPort` and `SecretsRandom`, same behaviour.
+
+### Added
+
+- Fuzzing with Atheris: `fuzz/fuzz_random.py` runs the public API's
+  contract (`tests/fuzz_contract.py`: range, length, errors and their
+  messages, and the rejection loop) under libFuzzer from a seed corpus,
+  through `make fuzz` and a 60-second CI job on Linux. The unit tests
+  replay the corpus and Hypothesis input through the same contract on
+  every platform. Atheris is a `fuzz` dependency group, installed only
+  on Linux x86-64 with CPython 3.12 to 3.14.
+- `.github/CODEOWNERS`, naming the maintainer as owner of every file.
+
+### Changed
+
+- The release workflow's post-publish check saves PyPI's JSON and reads
+  the file digests with `jq` instead of piping `curl` into `python3`
+  (OpenSSF Scorecard, PinnedDependencies). An empty file list now
+  retries instead of passing.
+
 ## [0.0.22] - 2026-11-18
 
 The repository's first version, released as the first jspassgen suite

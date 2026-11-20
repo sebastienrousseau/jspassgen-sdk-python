@@ -11,7 +11,7 @@ abstract: >-
 authors:
   - family-names: Rousseau
     given-names: Sebastien
-version: "0.0.22"
+version: "0.0.23"
 # Dual-licensed, at the user's option (LICENSE-APACHE, LICENSE-MIT).
 license:
   - Apache-2.0

@@ -9,7 +9,7 @@ name = "jspassgen"
 # The single source of truth for the version: the package reads it back
 # with importlib.metadata, and scripts/verify-release-versions checks
 # every restatement against this line.
-version = "0.0.22"
+version = "0.0.23"
 description = "Native Python port of the jspassgen password and passphrase core, on the secrets module (in development)."
 readme = "README.md"
 requires-python = ">=3.11"
