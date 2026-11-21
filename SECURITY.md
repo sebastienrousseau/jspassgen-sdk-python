@@ -5,13 +5,14 @@
 ## Supported versions
 
 This package follows the [jspassgen](https://github.com/sebastienrousseau/jspassgen)
-suite cadence. `0.0.23` is the latest release. While
+suite cadence. `0.0.24` is the latest release. While
 pre-`1.0`, the latest released `0.0.x` receives security fixes; older
 `0.0.x` versions do not.
 
 | Version | Status | Receives security fixes? |
 | :--- | :--- | :--- |
-| `0.0.23` (latest) | Released 2026-11-20 | Yes |
+| `0.0.24` (latest) | Released 2026-11-21 | Yes |
+| `0.0.23` | Released 2026-11-20 | No |
 | `0.0.22` | Released 2026-11-18 | No |
 | `main` | In development | Yes |
 

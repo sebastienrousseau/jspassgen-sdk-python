@@ -16,5 +16,6 @@ Nothing here is dated.
    passing the kit.
 5. **Release.** The release workflow (`release.yml`: tag checks, PyPI
    trusted publishing, `SHA256SUMS`, a draft GitHub release) shipped in
-   0.0.22. Still to come: a dry-run mode and an SBOM; then examples,
+   0.0.22, and releases carry SLSA build provenance since 0.0.24.
+   Still to come: a dry-run mode and an SBOM; then examples,
    benchmarks and the README demo, all against real output.
